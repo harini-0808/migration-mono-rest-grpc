@@ -1,0 +1,47 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+option csharp_namespace = "userGrpc.Presentation.Protos";
+
+service UserService {
+    rpc GetUser (UserRequest) returns (UserResponse);
+    rpc GetAllUsers (Empty) returns (UserListResponse);
+    rpc CreateUser (UserCreateRequest) returns (UserResponse);
+    rpc UpdateUser (UserUpdateRequest) returns (UserResponse);
+    rpc DeleteUser (UserRequest) returns (UserResponse);
+}
+
+message UserRequest {
+    int32 id = 1;
+}
+
+message UserCreateRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string username = 3;
+    string password = 4;
+    google.protobuf.Timestamp enrollment_date = 5;
+}
+
+message UserUpdateRequest {
+    int32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string username = 4;
+    string password = 5;
+    google.protobuf.Timestamp enrollment_date = 6;
+}
+
+message UserResponse {
+    int32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string username = 4;
+    string password = 5;
+    google.protobuf.Timestamp enrollment_date = 6;
+}
+
+message UserListResponse {
+    repeated UserResponse users = 1;
+}
+
+message Empty {}

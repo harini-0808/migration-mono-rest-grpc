@@ -1,0 +1,29 @@
+@model IEnumerable<WebUI.Presentation.Models.Order>
+
+@{
+    ViewData["Title"] = "Order List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().OrderId)</th>
+            <th>@Html.DisplayNameFor(model => model.First().CustomerName)</th>
+            <th>@Html.DisplayNameFor(model => model.First().OrderDate)</th>
+            <th>@Html.DisplayNameFor(model => model.First().TotalAmount)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => order.OrderId)</td>
+                <td>@Html.DisplayFor(modelItem => order.CustomerName)</td>
+                <td>@Html.DisplayFor(modelItem => order.OrderDate)</td>
+                <td>@Html.DisplayFor(modelItem => order.TotalAmount)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Gateway.Presentation.Protos";
+
+service InventoryService {
+    rpc GetProduct (ProductRequest) returns (ProductResponse);
+    rpc GetAllProducts (Empty) returns (ProductListResponse);
+    rpc CreateProduct (ProductCreateRequest) returns (ProductResponse);
+    rpc UpdateProduct (ProductUpdateRequest) returns (ProductResponse);
+    rpc DeleteProduct (ProductRequest) returns (ProductResponse);
+}
+
+message ProductRequest {
+    int32 id = 1;
+}
+
+message ProductCreateRequest {
+    string name = 1;
+    int32 stock_quantity = 2;
+    double price = 3;
+}
+
+message ProductUpdateRequest {
+    int32 id = 1;
+    string name = 2;
+    int32 stock_quantity = 3;
+    double price = 4;
+}
+
+message ProductResponse {
+    int32 id = 1;
+    string name = 2;
+    int32 stock_quantity = 3;
+    double price = 4;
+}
+
+message ProductListResponse {
+    repeated ProductResponse products = 1;
+}
+
+message Empty {}

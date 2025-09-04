@@ -1,0 +1,25 @@
+2025-09-03 23:11:53,738 - INFO - migration_routes.py:103 - Output directory created/verified at: C:\Users\284699\Desktop\Tasks\MIGRATION\TOOL(Legacy Lift)\mono to grpc\project-updated\dotnet-microservice-extractor\output
+2025-09-03 23:11:59,824 - INFO - main.py:33 - GET / 404 0.00s
+2025-09-03 23:11:59,889 - INFO - main.py:33 - GET /favicon.ico 404 0.00s
+2025-09-03 23:12:04,718 - INFO - main.py:33 - GET /docs 200 0.00s
+2025-09-03 23:12:06,011 - INFO - main.py:33 - GET /openapi.json 200 0.02s
+2025-09-03 23:12:44,689 - INFO - main.py:33 - POST /api/v1/migration/register 200 0.04s
+2025-09-03 23:14:35,158 - INFO - main.py:33 - POST /migration/register 404 0.00s
+2025-09-03 23:16:10,842 - INFO - main.py:33 - POST /migration/register 404 0.00s
+2025-09-03 23:17:53,839 - INFO - main.py:33 - POST /register 404 0.00s
+2025-09-03 23:18:35,745 - INFO - main.py:33 - POST /api/v1/migration/register 422 0.01s
+2025-09-03 23:22:36,827 - INFO - main.py:33 - POST /api/v1/register 404 0.00s
+2025-09-03 23:23:23,814 - INFO - main.py:33 - POST /api/v1/register 404 0.00s
+2025-09-03 23:23:41,437 - INFO - main.py:33 - POST /api/v1/register 404 0.00s
+2025-09-03 23:27:22,761 - INFO - main.py:33 - POST /api/v1/migration/login 401 0.02s
+2025-09-03 23:27:38,756 - INFO - main.py:33 - POST /api/v1/migration/login 200 0.03s
+2025-09-03 23:31:27,728 - INFO - main.py:33 - POST /api/v1/register 404 0.00s
+2025-09-03 23:56:32,432 - INFO - main.py:33 - POST /api/v1/login 404 0.00s
+2025-09-04 10:22:34,030 - INFO - main.py:33 - POST /api/v1/migration/api/v1/login 404 0.02s
+2025-09-04 10:22:49,309 - INFO - main.py:33 - OPTIONS /api/v1/migration/api/v1/register 200 0.01s
+2025-09-04 10:22:49,318 - INFO - main.py:33 - POST /api/v1/migration/api/v1/register 404 0.00s
+2025-09-04 10:24:05,476 - INFO - main.py:33 - POST /api/v1/migration/api/v1/register 404 0.00s
+2025-09-04 10:25:02,159 - INFO - main.py:33 - POST /api/v1/migration/api/v1/login 404 0.00s
+2025-09-04 10:28:30,040 - INFO - main.py:33 - POST /api/v1/migration/login 200 0.23s
+2025-09-04 10:33:23,196 - INFO - main.py:33 - OPTIONS /api/v1/migration/register 200 0.00s
+2025-09-04 10:33:23,210 - INFO - main.py:33 - POST /api/v1/migration/register 422 0.01s

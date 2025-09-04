@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Gateway.Presentation.Protos";
+
+service CustomerService {
+    rpc GetCustomer (CustomerRequest) returns (CustomerResponse);
+    rpc GetAllCustomers (Empty) returns (CustomerListResponse);
+    rpc CreateCustomer (CustomerCreateRequest) returns (CustomerResponse);
+    rpc UpdateCustomer (CustomerUpdateRequest) returns (CustomerResponse);
+    rpc DeleteCustomer (CustomerRequest) returns (CustomerResponse);
+}
+
+message CustomerRequest {
+    int32 id = 1;
+}
+
+message CustomerCreateRequest {
+    string name = 1;
+    string email = 2;
+}
+
+message CustomerUpdateRequest {
+    int32 id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message CustomerResponse {
+    int32 id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message CustomerListResponse {
+    repeated CustomerResponse customers = 1;
+}
+
+message Empty {}

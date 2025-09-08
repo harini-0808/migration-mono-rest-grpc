@@ -187,10 +187,10 @@ npm install
 # Configuration
 1.	Configure the database connection in config/db_config.py for storing analysis results and user credentials.
 2.	Set up LLM settings in config/llm_config.py.
-3.	Create an output directory for generated files: mkdir output.
-4.	Configure frontend settings, such as API endpoints in React components (e.g., VITE_BACKEND_URL in the frontend's .env file).
-5.	Set the JWT secret key in auth.py or as an environment variable (JWT_SECRET_KEY) for secure authentication.
-6.	Set your azure openai api and embeddings endpoint and key and also database credentials in .env file.
+3.	Configure frontend settings, such as API endpoints in React components (e.g., VITE_BACKEND_URL in the frontend's .env file).
+4.	Set the JWT secret key in auth.py or as an environment variable (JWT_SECRET_KEY) for secure authentication.
+5.	Set your azure openai api and embeddings endpoint and key and also database credentials in .env file.
+   
 # Running the Service
 Start the FastAPI backend server:
 cd dotnet-microservice-extraction

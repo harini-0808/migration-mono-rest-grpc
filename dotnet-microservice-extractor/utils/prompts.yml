@@ -1,3 +1,735 @@
+# # prompts.yml
+
+# base_prompt: |
+#   Core Migration Principles:
+#   - Modernize code structure
+#   - Improve maintainability
+#   - Adopt current best practices
+#   - Minimize unnecessary complexity
+#   - Use ADO.NET for data access with manual MySQL queries, MySqlConnection, MySqlCommand, and MySqlDataReader
+#   - Retrieve connection strings from appsettings.json using Configuration.GetConnectionString("DefaultConnection")
+#   - Focus on clean, readable code
+
+# file_type_prompts:
+#   base_guidelines: |
+#     Universal Migration Strategies:
+#     - Update to latest .NET patterns
+#     - Simplify code structure
+#     - Use modern language features
+#     - Improve error handling
+#     - Enhance performance where possible
+#     - Do proper null checks
+#     - Ensure that the return types are correct
+#     - For working with URLs, use WebUtility.UrlEncode() from System.Net
+
+#   controller:
+#     prompt: |
+#       Generate a REST API controller in ASP.NET Core Web API that acts as a gRPC gateway for {Entity} operations. **Make sure this controller file is generated in gateway for every project.**
+
+#       - Controller class name should be {Entity}GrpcController, based on the {Entity} from the repository interface (I{Entity}Repository).
+#       - Namespace should be {Microservice}.Controllers
+#       - Import required namespaces:
+#         - Microsoft.AspNetCore.Mvc
+#         - System.Threading.Tasks
+#         - {Microservice}.Presentation.Protos (for gRPC stubs and request/response types)
+#       - Decorate the class with [ApiController] and [Route("api/{entityLower}")]
+
+#       - Inject the gRPC client `{Entity}Service.{Entity}ServiceClient` using constructor injection.
+#       - Implement controller methods corresponding to **all methods** defined in I{Entity}Service (from {Microservice}.Application.Interfaces).
+#         - Map HTTP routes using [HttpGet], [HttpPost], [HttpPut], [HttpDelete] appropriately.
+#         - **Important** Make sure The Controller Action Methods (or simply Action Methods) should follow the pattern:
+#           - 'Get{Entity}',
+#           - 'GetAll{Entities}', 
+#           - 'Create{Entity}', etc.
+#         - **Important** The Method Names should follow the pattern:
+#           - `Get{Entity}Async`
+#           - `GetAll{Entities}Async`
+#           - `Create{Entity}Async`, etc.
+
+#       - Use this structure for each method:
+#         - Use the correct input message (e.g., `{Entity}Request`, `{Entity}CreateRequest`, etc.) derived from the method parameters.
+#         - Await the corresponding method on the gRPC client.
+#         - Return the response wrapped in `Ok(...)`.
+
+#       Example patterns (for illustration only, dynamically generate based on I{Entity}Service):
+#         [HttpGet("get")]
+#         public async Task<IActionResult> GetUserAsync(int id)
+#         {
+#             var request = new UserRequest { Id = id };
+#             var response = await _userGrpcClient.GetUserAsync(request);
+#             return Ok(response);
+#         }
+
+#         [HttpPost("create")]
+#         public async Task<IActionResult> CreateUserAsync([FromBody] UserCreateRequest request)
+#         {
+#             var response = await _userGrpcClient.CreateUserAsync(request);
+#             return Ok(response);
+#         }
+
+#       - Generate one method per interface method dynamically.
+
+#   view:
+#     prompt: |
+#       View Migration Essentials:
+#       - Update to modern Razor syntax
+#       - Use tag helpers
+#       - Optimize frontend assets
+#       - Improve accessibility
+#       - Centralize static resources
+#         * CSS in wwwroot/contents
+#         * JavaScript in wwwroot/scripts
+#       - Views should be placed in Views/{Entity}, where {Entity} is the capitalized entity name (e.g., Product, Order)
+
+#   config:
+#     prompt: |
+#       Configuration Modernization:
+#       - Adopt options pattern
+#       - Use environment-based configs
+#       - Implement secret management
+#       - Add logging configuration
+#       - Use strongly-typed settings
+#       - Use only one port number and HTTP
+#       - Configuration file (e.g., appsettings.json) should reflect settings for {Entity} microservice, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Include a connection string for ADO.NET data access under ConnectionStrings:DefaultConnection (e.g., "Server=localhost;Database={Entity}Db;Trusted_Connection=True;")
+#       - Example (for illustration only, dynamically generate based on {Entity}):
+#         {
+#           "ConnectionStrings": {
+#             "DefaultConnection": "Server=localhost;Database={Entity}Db;Trusted_Connection=True;"
+#           },
+#           "JwtSettings": {
+#             "Secret": "your-jwt-secret-key",
+#             "Issuer": "{Microservice}",
+#             "Audience": "{Microservice}"
+#           }
+#         }
+
+#   model:
+#     prompt: |
+#       Model Enhancement Guidelines:
+#       - Use modern data annotations (e.g., [Required], [StringLength]) for validation
+#       - Implement clean validation logic and adopt nullable reference types
+#       - Simplify data interactions with appropriate patterns (e.g., repositories, data access classes)
+#       - Add clear documentation for models and properties
+#       - Use proper namespaces for all classes, interfaces, and references
+#       - Class name should be {Entity}, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Namespace should be {Microservice}.Domain.Entities, where {Microservice} is derived from the microservice name (e.g., ProductGrpc, OrderGrpc)
+#       - If ASPX markup is present, infer entity fields from control IDs (e.g., txtFirstName → FirstName, txtEmail → Email)
+#       - Avoid merging fields unless clearly combined in code-behind; maintain original field names from markup
+
+#   dto:
+#     prompt: |
+#       Generate DTO classes strictly based on the properties defined in the corresponding {Entity} entity class, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Include only primitive types or simple value objects that directly map to {Entity} properties
+#       - Do NOT add any additional properties that do not exist in the {Entity} entity
+#       - Exclude any navigation properties or complex domain logic from the DTO
+#       - Include only properties necessary for data transfer (e.g., exclude calculated or transient properties)
+#       - Keep property names and types identical to those in the {Entity} entity (use PascalCase)
+#       - Do not include methods or business logic; DTOs are data containers only
+#       - Add XML comments reflecting {Entity} property descriptions if available
+#       - Use nullable types in DTO only if the {Entity} property is nullable
+#       - Ensure DTOs are lightweight and designed for serialization
+#       - Class name should be {Entity}Dto
+#       - Place DTOs in the namespace {Microservice}.Application.DTOs, where {Microservice} is derived from the microservice name (e.g., ProductGrpc, OrderGrpc)
+
+#   data_access:
+#     prompt: |
+#       Generate a data access class for ADO.NET operations for the {Entity} entity, ensuring properties and MySQL queries exactly match those defined in {Entity}Dto from {Microservice}.Application.DTOs.
+
+#       - Class name: {Entity}DataAccess
+#       - Namespace: {Microservice}.Infrastructure.Data
+#       - Use ADO.NET with MySqlConnection, MySqlCommand, and MySqlDataReader for database operations
+#       - Inject the connection string via constructor, retrieved from Configuration.GetConnectionString("DefaultConnection")
+#       - Validate the connection string: throw an exception if null or empty
+#       - Implement asynchronous CRUD methods: GetByIdAsync, GetAllAsync, AddAsync, UpdateAsync, DeleteAsync
+#       - **CRITICAL: Dynamically generate MySQL queries and property mappings based EXACTLY on the properties in {Entity}Dto:**
+#         - Analyze {Entity}Dto to extract ALL properties (names and types)
+#         - Use these properties in MySQL queries (e.g., SELECT, INSERT, UPDATE) and result mappings
+#         - Do NOT use hardcoded properties (e.g., Id, Name, Description); use only {Entity}Dto properties
+#         - Convert C# PascalCase property names to database column names (e.g., PascalCase to snake_case or match database schema)
+#         - Map C# types to MySQL types:
+#           - int → INT
+#           - string → NVARCHAR
+#           - DateTime → DATETIME
+#           - DateTime? → DATETIME (nullable in MySQL)
+#           - bool → BIT
+#           - decimal/double → DECIMAL
+#           - float → FLOAT
+#           - Guid → UNIQUEIDENTIFIER
+#       - MySQL query patterns:
+#         - GetByIdAsync: SELECT {Property1}, {Property2}, ... FROM {Entity}s WHERE {IdProperty} = @Id
+#         - GetAllAsync: SELECT {Property1}, {Property2}, ... FROM {Entity}s
+#         - AddAsync: INSERT INTO {Entity}s ({Property1}, {Property2}, ...) VALUES (@Property1, @Property2, ...); SELECT SCOPE_IDENTITY()
+#         - UpdateAsync: UPDATE {Entity}s SET {Property1} = @Property1, {Property2} = @Property2, ... WHERE {IdProperty} = @Id
+#         - DeleteAsync: DELETE FROM {Entity}s WHERE {IdProperty} = @Id
+#       - Use proper parameter binding with MySqlCommand to prevent MySQL injection
+#       - Map database results to {Entity} objects using {Entity}Dto property names and types
+#       - Return types:
+#         - GetByIdAsync: Task<{Entity}?>
+#         - GetAllAsync: Task<List<{Entity}>>
+#         - AddAsync: Task<int> (returns the new ID)
+#         - UpdateAsync: Task
+#         - DeleteAsync: Task
+#       - Use proper namespaces:
+#         - {Microservice}.Domain.Entities for {Entity}
+#         - MySqlConnector for ADO.NET
+#         - System, System.Collections.Generic, System.Threading.Tasks for standard types
+#       - Example (for illustration only, dynamically generate based on {Entity}Dto properties):
+#         using MySqlConnector;
+#         using System.Collections.Generic;
+#         using System.Threading.Tasks;
+#         using {Microservice}.Domain.Entities;
+
+#         namespace {Microservice}.Infrastructure.Data
+#         {
+#             public class {Entity}DataAccess
+#             {
+#                 private readonly string _connectionString;
+
+#                 public {Entity}DataAccess(string connectionString)
+#                 {
+#                     if (string.IsNullOrEmpty(connectionString))
+#                         throw new ArgumentException("Connection string cannot be null or empty.", nameof(connectionString));
+#                     _connectionString = connectionString;
+#                 }
+
+#                 public async Task<{Entity}?> GetByIdAsync(int id)
+#                 {
+#                     using var conn = new MySqlConnection(_connectionString);
+#                     await conn.OpenAsync();
+#                     using var cmd = new MySqlCommand("SELECT {Property1}, {Property2}, {Property3} FROM {Entity}s WHERE {Property1} = @Id", conn);
+#                     cmd.Parameters.AddWithValue("@Id", id);
+#                     using var reader = await cmd.ExecuteReaderAsync();
+#                     if (await reader.ReadAsync())
+#                     {
+#                         return new {Entity}
+#                         {
+#                             {Property1} = reader.GetInt32(0),
+#                             {Property2} = reader.GetString(1),
+#                             {Property3} = reader.GetString(2)
+#                         };
+#                     }
+#                     return null;
+#                 }
+#             }
+#         }
+
+#   repository:
+#     prompt: |
+#       Repository Design Principles:
+#       - Implement I{Entity}Repository from {Microservice}.Domain.Repositories in {Entity}Repository class, located in {Microservice}.Infrastructure.Repositories, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Use ADO.NET for database operations, injecting a connection string or {Entity}DataAccess from {Microservice}.Infrastructure.Data
+#       - Use dependency injection to inject {Entity}DataAccess or the connection string
+#       - Implement all methods as asynchronous using async/await, returning Task or Task<T> as defined in I{Entity}Repository
+#       - Work exclusively with {Entity} entities from {Microservice}.Domain.Entities
+#       - Use ADO.NET with inline MySQL queries for data access:
+#         - Use MySqlConnection, MySqlCommand, and MySqlDataReader for querying
+#         - Retrieve connection string from Configuration.GetConnectionString("DefaultConnection")
+#         - For GetByIdAsync: SELECT * FROM {Entity}s WHERE Id = @Id
+#         - For GetAllAsync: SELECT * FROM {Entity}s
+#         - For AddAsync: INSERT INTO {Entity}s (fields) VALUES (@values); SELECT SCOPE_IDENTITY()
+#         - For UpdateAsync: UPDATE {Entity}s SET field1 = @value1, ... WHERE Id = @Id
+#         - For DeleteAsync: DELETE FROM {Entity}s WHERE Id = @Id
+#       - Ensure method names match I{Entity}Repository exactly (GetByIdAsync, GetAllAsync, AddAsync, UpdateAsync, DeleteAsync)
+#       - Use proper namespaces:
+#         - {Microservice}.Domain.Entities for {Entity}
+#         - {Microservice}.Domain.Repositories for I{Entity}Repository
+#         - {Microservice}.Infrastructure.Data for {Entity}DataAccess
+#         - MySqlConnector for ADO.NET
+#         - System, System.Collections.Generic, System.Threading.Tasks for standard types
+#       - Allow GetByIdAsync to return {Entity}? to indicate possible absence of data
+#       - Generate the file in the {Microservice}.Infrastructure.Repositories namespace
+#       - Example (for illustration only, dynamically generate based on {Entity} properties):
+#         public async Task<Product?> GetByIdAsync(int id)
+#         {
+#             using var conn = new MySqlConnection(_connectionString);
+#             await conn.OpenAsync();
+#             using var cmd = new MySqlCommand("SELECT Id, Name, Description FROM Products WHERE Id = @Id", conn);
+#             cmd.Parameters.AddWithValue("@Id", id);
+#             using var reader = await cmd.ExecuteReaderAsync();
+#             if (await reader.ReadAsync())
+#             {
+#                 return new Product
+#                 {
+#                     Id = reader.GetInt32(0),
+#                     Name = reader.GetString(1),
+#                     Description = reader.GetString(2)
+#                 };
+#             }
+#             return null;
+#         }
+
+#   cshtml:
+#     prompt: |
+#       Razor View Transformation:
+#       - @page should have a route (e.g., /@entityLower, where {entityLower} is the lowercase entity name, e.g., product, order)
+#       - Update routing and model declarations
+#       - Convert to tag helpers
+#       - Simplify partial view inclusion
+#       - Centralize asset management
+#       - Improve form handling
+#       - Clean up view composition
+#       - Views should be placed in Views/{Entity}, where {Entity} is the capitalized entity name (e.g., Product, Order)
+
+#   cshtml_cs:
+#     prompt: |
+#       Razor Page Code-Behind Modernization:
+#       - Streamline class structure
+#       - Use focused handler methods
+#       - Simplify dependency injection
+#       - Implement pragmatic validation
+#       - Improve error management
+#       - Do not add logging
+#       - Class name should be {Entity}Model, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Namespace should be {Microservice}.Pages, where {Microservice} is derived from the microservice name (e.g., ProductGrpc, OrderGrpc)
+
+#   layout:
+#     prompt: |
+#       Layout File Guidelines:
+#       - **URL Routing**: Use direct URLs for navigation:
+#         * `<li><a href="/{entityLower}">{Entity}</a></li>` (where {entityLower} is lowercase, {Entity} is capitalized, e.g., product/Product, order/Order)
+#       - **Bootstrap Setup**: 
+#         * Add Bootstrap CDN in the `<head>`:
+#           ```html
+#           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+#           ```
+#         * Use `navbar-expand-lg` for responsive navigation; use dark theme
+#         * Include required stylesheets:
+#           ```html
+#           <link rel="stylesheet" href="~/content/{entityLower}.css" />
+#           ```
+#         * Include required scripts:
+#           ```html
+#           <script src="~/scripts/{entityLower}.js"></script>
+#           ```
+#       - **Asset Organization**:
+#         * Store CSS in `~/css/`, JavaScript in `~/js/`, and images in `~/images/`
+#       - **Header/Footer Structure**:
+#         * Use semantic HTML5 elements
+#         * Add dynamic copyright year update
+#         * Ensure responsiveness using containers
+#       - **SEO & Meta Tags**:
+#         * Include proper charset, viewport settings, and title structure reflecting {Entity} (e.g., Product, Order)
+
+#   razor_component:
+#     prompt: |
+#       Razor Component Evolution:
+#       - Optimize lifecycle methods
+#       - Simplify state management
+#       - Improve component interactions
+#       - Minimize JavaScript interop
+#       - Focus on clean rendering
+#       - Component name should reflect {Entity}, e.g., {Entity}Component
+#       - Namespace should be {Microservice}.Components, where {Microservice} is derived from the microservice name (e.g., ProductGrpc, OrderGrpc)
+
+#   service:
+#     prompt: |
+#       Service Design Principles:
+#       - Implement I{Entity}Service from {Microservice}.Application.Interfaces in {Entity}Service class, located in {Microservice}.Application.Services, where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Use dependency injection to inject:
+#         - I{Entity}Repository from {Microservice}.Domain.Repositories
+#         - ILogger<{Entity}Service> from Microsoft.Extensions.Logging
+#       - Register {Entity}Service with scoped lifetime for dependency injection
+#       - Implement async methods using async/await, returning Task or Task<T> as defined in I{Entity}Service
+#       - Adhere to single responsibility principle: {Entity}Service orchestrates business logic, maps between {Entity}Dto (from {Microservice}.Application.DTOs) and {Entity} (from {Microservice}.Domain.Entities), and delegates data access to I{Entity}Repository
+#       - Map {Entity}Dto to/from {Entity} using private methods (e.g., MapToDto, MapToEntity) to isolate Domain models from the API
+#       - Call I{Entity}Repository methods (GetByIdAsync, GetAllAsync, AddAsync, UpdateAsync, DeleteAsync) correctly, ensuring no method name mismatches
+#       - Use proper namespaces:
+#         - {Microservice}.Application.DTOs for {Entity}Dto
+#         - {Microservice}.Application.Interfaces for I{Entity}Service
+#         - {Microservice}.Domain.Entities for {Entity}
+#         - {Microservice}.Domain.Repositories for I{Entity}Repository
+#         - System.Linq for LINQ methods (e.g., Select)
+#         - System, System.Collections.Generic, System.Threading.Tasks for standard types
+#       - Generate the file in the {Microservice}.Application.Services namespace
+
+#   interface:
+#     prompt: |
+#       Interface Design Principles:
+#       - Define interfaces with clear, explicit method signatures for their respective layers:
+#         - I{Entity}Service in {Microservice}.Application.Interfaces for business logic, using {Entity}Dto from {Microservice}.Application.DTOs
+#         - I{Entity}Repository in {Microservice}.Domain.Repositories for data access, using {Entity} from {Microservice}.Domain.Entities
+#       - Use proper namespaces for all references:
+#         - {Microservice}.Application.DTOs for {Entity}Dto
+#         - {Microservice}.Domain.Entities for {Entity}
+#         - System.Collections.Generic for IEnumerable
+#         - System.Threading.Tasks for Task
+#       - Define async methods returning Task or Task<T> for all operations
+#       - Include methods for CRUD operations:
+#         - For I{Entity}Service: Get{Entity}Async(int id), GetAll{Entities}Async(), Add{Entity}Async({Entity}Dto), Update{Entity}Async({Entity}Dto), Delete{Entity}Async(int id)
+#         - For I{Entity}Repository: GetByIdAsync(int id), GetAllAsync(), AddAsync({Entity}), UpdateAsync({Entity}), DeleteAsync(int id)
+#       - Ensure method names reflect layer responsibilities:
+#         - I{Entity}Service uses business-friendly names (e.g., Get{Entity}Async) to reflect Application layer intent
+#         - I{Entity}Repository uses data-centric names (e.g., GetByIdAsync) to reflect Domain layer data access
+#       - Allow Get{Entity}Async and GetByIdAsync to return nullable types ({Entity}Dto? and {Entity}?) to indicate possible absence of data
+#       - Generate files in their respective namespaces:
+#         - I{Entity}Service.cs in {Microservice}.Application.Interfaces
+#         - I{Entity}Repository.cs in {Microservice}.Domain.Repositories
+#       - Do not include implementation details or dependencies beyond type references
+
+#   middleware:
+#     prompt: |
+#       Middleware Modernization:
+#       - Follow clean middleware conventions
+#       - Implement async patterns
+#       - Simplify error handling
+#       - Optimize request pipeline
+#       - Add clear logging
+#       - Middleware name should reflect purpose related to {Entity} if applicable (e.g., {Entity}ValidationMiddleware)
+#       - Namespace should be {Microservice}.Middleware, where {Microservice} is derived from the microservice name (e.g., ProductGrpc, OrderGrpc)
+
+#   program:
+#     prompt: |
+#       Program.cs Transformation:
+#       - Adopt minimal API patterns for MVC architecture
+#       - Simplify service configuration
+#       - Streamline middleware setup
+#       - Using Microsoft.AspNetCore.Builder
+#       - Using Microsoft.Extensions.DependencyInjection
+#       - Using Microsoft.Extensions.Hosting
+#       - Add Swagger UI, e.g.:
+#         builder.Services.AddSwaggerGen(c =>
+#         {
+#             c.SwaggerDoc("v1", new OpenApiInfo
+#             {
+#                 Title = "{Entity} API",
+#                 Version = "v1",
+#                 Description = "API for managing {entityLower} entities"
+#             });
+#         });
+#       - Add mapping for controllers (builder.Services.AddControllersWithViews(); , app.MapControllers();)
+#       - Configure Dependency Injection (DI):
+#         - Register repository with builder.Services.AddScoped<I{Entity}Repository, {Entity}Repository>()
+#         - Register service with builder.Services.AddScoped<I{Entity}Service, {Entity}Service>()
+#         - Register data access with builder.Services.AddScoped<{Entity}DataAccess>(sp => new {Entity}DataAccess(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")))
+#       - Retrieve connection string for ADO.NET:
+#         - var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+#         - if (string.IsNullOrEmpty(connectionString)) { throw new Exception("Connection string 'DefaultConnection' not found."); }
+#       - Configure AutoMapper for DTO-to-entity mapping:
+#         - Create a MapperConfiguration with bidirectional mapping between {Entity}Dto and {Entity} entity
+#         - Example mapping (for illustration only, dynamically generate based on {Entity} properties):
+#           .CreateMap<{Entity}Dto, {Entity}>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id)) for relevant properties, with .ReverseMap()
+#         - Register the mapper as a singleton with builder.Services.AddSingleton(mapperConfig.CreateMapper())
+#       - Configure logging:
+#         - Add console logging with builder.Services.AddLogging(logging => { logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Debug); })
+
+#   csproj:
+#     prompt: |
+#       Project File Optimization:
+#       - Update target framework
+#       - Use `<Project Sdk="Microsoft.NET.Sdk.Web">` for web applications and `<Project Sdk="Microsoft.NET.Sdk">` for others
+#       - Include `<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.0" />` if it is a web API
+#       - Manage package references; only include the packages if required, as some packages might be included by default with the target framework (e.g., MySqlConnector for ADO.NET)
+#       - Configure build properties like output paths and versions as needed
+#       - Add `<Nullable>enable</Nullable>` for nullable reference types
+#       - Define the project's output type: use 'Exe' for presentation applications and 'Library' for all other project types
+#       - **Project Dependencies and References**:
+#         - Domain: Should not reference any other project
+#         - Application: Must reference Domain and Infrastructure
+#           e.g., <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#                 <ProjectReference Include="..\{Microservice}.Infrastructure\{Microservice}.Infrastructure.csproj" />
+#         - Infrastructure: Should only reference Domain
+#           e.g., <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#         - Presentation: Must reference Application
+#           e.g., <ProjectReference Include="..\{Microservice}.Application\{Microservice}.Application.csproj" />
+#       - Ensure a clean and structured `.csproj` file without unnecessary dependencies
+#       - For gateway, add Ocelot package references:
+#         <PackageReference Include="Ocelot" Version="23.2.2" />
+#       - Project file name should be {Microservice}.{Layer}.csproj, where {Layer} is Domain, Application, Infrastructure, or Presentation
+#       - Example (for illustration only, dynamically generate based on {Microservice} and {Layer}):
+#         <Project Sdk="Microsoft.NET.Sdk">
+#           <PropertyGroup>
+#             <TargetFramework>net{target_version}</TargetFramework>
+#             <Nullable>enable</Nullable>
+#             <ImplicitUsings>enable</ImplicitUsings>
+#             <OutputType>Library</OutputType>
+#           </PropertyGroup>
+#           <ItemGroup>
+#             <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#           </ItemGroup>
+#         </Project>
+
+#   ocelot:
+#     prompt: |
+#       Generate an Ocelot configuration file (ocelot.json) for an API Gateway in a .NET microservices architecture
+#       - Include routes for the following microservices: {microservices_list}
+#       - Use the instruction: {instruction_text}
+#       - Each microservice should have:
+#         - DownstreamPathTemplate: "/api/{entityLower}/{everything}"
+#         - UpstreamPathTemplate: "/api/{entityLower}/{everything}"
+#         - DownstreamScheme: "http"
+#         - DownstreamHostAndPorts: [{ "Host": "localhost", "Port": <unique_port> }]
+#         - UpstreamHttpMethod: ["GET", "POST", "PUT", "DELETE"]
+#         - AuthenticationOptions: { "AuthenticationProviderKey": "Bearer", "AllowedScopes": [] } (except for auth routes)
+#       - Assign unique ports starting from 5000 (e.g., auth: 5000, {entityLower}: 5001, etc.)
+#       - Include GlobalConfiguration with BaseUrl: "http://localhost:5004"
+#       - Ensure the output is valid JSON
+#       - Use {entityLower} for path templates, where {entityLower} is the lowercase entity name (e.g., product, order)
+
+#   proto:
+#     prompt: |
+#       Generate a proto3 .proto file to define a gRPC service named {Entity}Service for the {Microservice}.
+
+#       - Use syntax = "proto3"
+#       - Set the C# namespace:
+#         option csharp_namespace = "{Microservice}.Presentation.Protos";
+
+#       - Service name: {Entity}Service
+
+#       - Generate **one rpc method** in the service for **each method** defined in I{Entity}Service (from {Microservice}.Application.Interfaces)
+#         - Method names must match exactly (e.g., rpc Get{Entity} ({Entity}Request) returns ({Entity}Response);)
+#         - Use Empty message for methods that take no parameters
+
+#       - **CRITICAL: Generate request/response message types based EXACTLY on the properties defined in {Entity}Dto (from {Microservice}.Application.DTOs):**
+#         - **ANALYZE the actual {Entity}Dto class and extract ALL its properties with their exact names and types**
+#         - **DO NOT use hardcoded or example properties (like 'name', 'email', 'created_at') - these are just examples**
+#         - **Extract field names and types directly from the provided {Entity}Dto class definition - do NOT add any fields that don't exist in the DTO**
+#         - **Do NOT omit any fields that exist in {Entity}Dto**
+#         - **If {Entity}Dto has properties like FirstName, LastName, Username, Password, EnrollmentDate - use EXACTLY these properties**
+#         - **Include only primitive types or simple value objects that directly map to {Entity}Dto properties**
+#         - **Exclude any navigation properties or complex domain logic from proto messages (same as DTO logic)**
+#         - Convert C# PascalCase DTO property names to snake_case in proto messages (e.g., FirstName → first_name, LastName → last_name, EnrollmentDate → enrollment_date)
+#         - **Match C# types to proto types exactly:**
+#           - int → int32
+#           - long → int64
+#           - string → string
+#           - DateTime → google.protobuf.Timestamp (import "google/protobuf/timestamp.proto")
+#           - DateTime? → google.protobuf.Timestamp (nullable DateTime)
+#           - bool → bool
+#           - decimal/double → double
+#           - float → float
+#           - Guid → string
+#           - enum types → corresponding proto enum
+#           - **Nullable types in DTO → regular field in proto3 (proto3 handles optionality inherently)**
+#         - **Ensure one-to-one property mapping: every property in {Entity}Dto must appear in proto messages with correct type**
+
+#       - **Generate these standard message types based on ACTUAL {Entity}Dto structure:**
+#         - **{Entity}Request** (includes only the ID/identifier field from {Entity}Dto if it exists - typically 'Id' property)
+#         - **{Entity}CreateRequest** (includes ALL {Entity}Dto properties EXCEPT the ID/identifier field)
+#         - **{Entity}UpdateRequest** (includes ALL {Entity}Dto properties including the ID/identifier field)
+#         - **{Entity}Response** (includes ALL properties from {Entity}Dto with exact field mapping - every single property must be included)
+#         - **{Entity}ListResponse** (repeated {Entity}Response {entityLower}s = 1)
+
+#       - **Always include these standard rpc methods:**
+#         - rpc Delete{Entity}({Entity}Request) returns ({Entity}Response);
+#         - rpc Get{Entity}({Entity}Request) returns ({Entity}Response);
+#         - rpc GetAll{Entities}(Empty) returns ({Entity}ListResponse);
+#         - rpc Create{Entity}({Entity}CreateRequest) returns ({Entity}Response);
+#         - rpc Update{Entity}({Entity}UpdateRequest) returns ({Entity}Response);
+
+#       - Always include: message Empty {}
+#       - Message fields should be numbered sequentially from 1
+#       - File name: {entityLower}grpc.proto
+#       - **Ensure proto messages reflect ACTUAL {Entity}Dto structure exactly - no missing fields, no extra fields, correct type mappings**
+#       - **Follow the same property inclusion/exclusion logic as the DTO generation prompt**
+#       - **EXAMPLE (for illustration only, dynamically generate based on {Entity}Dto properties):**
+#         syntax = "proto3";
+#         import "google/protobuf/timestamp.proto";
+#         option csharp_namespace = "{Microservice}.Presentation.Protos";
+#         service UserService {
+#           rpc GetUser (UserRequest) returns (UserResponse);
+#           rpc GetAllUsers (Empty) returns (UserListResponse);
+#           rpc CreateUser (UserCreateRequest) returns (UserResponse);
+#           rpc UpdateUser (UserUpdateRequest) returns (UserResponse);
+#           rpc DeleteUser (UserRequest) returns (UserResponse);
+#         }
+#         message UserRequest {
+#           int32 id = 1;
+#         }
+#         message UserCreateRequest {
+#           string first_name = 1;
+#           string last_name = 2;
+#           string username = 3;
+#           string password = 4;
+#           google.protobuf.Timestamp enrollment_date = 5;
+#         }
+#         message UserUpdateRequest {
+#           int32 id = 1;
+#           string first_name = 2;
+#           string last_name = 3;
+#           string username = 4;
+#           string password = 5;
+#           google.protobuf.Timestamp enrollment_date = 6;
+#         }
+#         message UserResponse {
+#           int32 id = 1;
+#           string first_name = 2;
+#           string last_name = 3;
+#           string username = 4;
+#           string password = 5;
+#           google.protobuf.Timestamp enrollment_date = 6;
+#         }
+#         message UserListResponse {
+#           repeated UserResponse users = 1;
+#         }
+#         message Empty {}
+
+#   grpc_service_cs:
+#     prompt: |
+#       Generate a gRPC service implementation:
+#       - Namespace: {Microservice}.Presentation.Services
+#       - Class name: {Entity}GrpcService
+#       - Inherit from {Entity}Service.{Entity}ServiceBase
+#       - Inject dependencies via constructor:
+#         - I{Entity}Service (from {Microservice}.Application.Interfaces)
+#         - ILogger<{Entity}GrpcService> for logging
+
+#       - For each method in I{Entity}Service:
+#         - Implement a corresponding gRPC method in {Entity}GrpcService
+#         - Method names and logic must match interface definition (e.g., Get{Entity}Async → Get{Entity})
+#         - Validate input (e.g., ID > 0)
+#         - Map request messages to DTOs using properties defined in {Entity}Dto
+#         - Map service results back to proto messages
+
+#       - Input validation:
+#         - Check for invalid IDs or missing fields
+#         - Throw RpcException with StatusCode.InvalidArgument when needed
+
+#       - Error handling:
+#         - Use try-catch around all logic
+#         - Throw appropriate RpcExceptions:
+#           - NotFound for missing data
+#           - InvalidArgument for bad inputs
+#           - Unknown for unexpected exceptions
+#         - Use ILogger to log info, warnings, and errors
+
+#       - Use namespaces:
+#         - {Microservice}.Application.Interfaces
+#         - {Microservice}.Application.DTOs
+#         - {Microservice}.Presentation.Protos
+#         - Grpc.Core
+#         - Microsoft.Extensions.Logging
+#         - System.Linq, System.Threading.Tasks
+
+#       - All methods must be asynchronous (Task or Task<>)
+
+#   program_cs_grpc:
+#     prompt: |
+#       Generate Program.cs for a gRPC microservice:
+#       - Use minimal API hosting with WebApplication.CreateBuilder(args)
+#       - Add gRPC services with builder.Services.AddGrpc()
+#       - Map the gRPC service with app.MapGrpcService<{Entity}GrpcService>(), where {Entity} is the capitalized entity name (e.g., Product, Order)
+#       - Configure Dependency Injection (DI):
+#         - Register repository with builder.Services.AddScoped<I{Entity}Repository, {Entity}Repository>()
+#         - Register service with builder.Services.AddScoped<I{Entity}Service, {Entity}Service>()
+#         - Register data access with builder.Services.AddScoped<{Entity}DataAccess>(sp => new {Entity}DataAccess(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")))
+#       - Retrieve connection string for ADO.NET:
+#         - var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+#         - if (string.IsNullOrEmpty(connectionString)) { throw new Exception("Connection string 'DefaultConnection' not found."); }
+#       - Configure AutoMapper for DTO-to-entity mapping:
+#         - Create a MapperConfiguration with bidirectional mapping between {Entity}Dto and {Entity} entity
+#         - Example mapping (for illustration only, dynamically generate based on {Entity} properties):
+#           .CreateMap<{Entity}Dto, {Entity}>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id)) for relevant properties, with .ReverseMap()
+#         - Register the mapper as a singleton with builder.Services.AddSingleton(mapperConfig.CreateMapper())
+#       - Configure logging:
+#         - Add console logging with builder.Services.AddLogging(logging => { logging.AddConsole(); logging.SetMinimumLevel(LogLevel.Debug); })
+#       - Configure Kestrel for HTTP/2:
+#         - Use builder.WebHost.ConfigureKestrel(options => { options.ListenLocalhost(<port>, listenOptions => { listenOptions.Protocols = HttpProtocols.Http2; }); })
+#         - Assign a unique port based on the microservice (e.g., 5001 for {entityLower}, incrementing for each microservice)
+#       - Configure the HTTP request pipeline:
+#         - Map a root endpoint with app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.")
+#       - Run the application with app.Run()
+#       - Ensure proper namespace imports for:
+#         - {Microservice}.Domain.Repositories, {Microservice}.Domain.Entities
+#         - {Microservice}.Application.Interfaces, {Microservice}.Application.Services, {Microservice}.Application.DTOs
+#         - {Microservice}.Infrastructure.Data, {Microservice}.Infrastructure.Repositories
+#         - {Microservice}.Presentation.Services
+#         - AutoMapper, Microsoft.AspNetCore.Server.Kestrel.Core, Microsoft.Extensions.Logging
+#       - Example (for illustration only, dynamically generate based on {Entity} and {Microservice}):
+#         using Microsoft.AspNetCore.Builder;
+#         using Microsoft.Extensions.DependencyInjection;
+#         using AutoMapper;
+#         using {Microservice}.Domain.Repositories;
+#         using {Microservice}.Application.Interfaces;
+#         using {Microservice}.Application.Services;
+#         using {Microservice}.Infrastructure.Data;
+#         using {Microservice}.Infrastructure.Repositories;
+#         using {Microservice}.Presentation.Services;
+
+#         var builder = WebApplication.CreateBuilder(args);
+#         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+#         if (string.IsNullOrEmpty(connectionString)) { throw new Exception("Connection string 'DefaultConnection' not found."); }
+
+#         builder.Services.AddGrpc();
+#         builder.Services.AddScoped<I{Entity}Repository, {Entity}Repository>();
+#         builder.Services.AddScoped<I{Entity}Service, {Entity}Service>();
+#         builder.Services.AddScoped<{Entity}DataAccess>(sp => new {Entity}DataAccess(connectionString));
+#         var mapperConfig = new MapperConfiguration(cfg => { cfg.CreateMap<{Entity}Dto, {Entity}>().ReverseMap(); });
+#         builder.Services.AddSingleton(mapperConfig.CreateMapper());
+
+#         var app = builder.Build();
+#         app.MapGrpcService<{Entity}GrpcService>();
+#         app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
+#         app.Run();
+
+#   csproj_grpc:
+#     prompt: |
+#       Project File Optimization for gRPC:
+#       - Update target framework
+#       - SDK:
+#         - Use `<Project Sdk="Microsoft.NET.Sdk.Web">` for Presentation projects (web applications)
+#         - Use `<Project Sdk="Microsoft.NET.Sdk">` for Domain, Application, and Infrastructure projects
+#       - Build Properties:
+#         - Enable nullable reference types: `<Nullable>enable</Nullable>`
+#         - Enable implicit using directives: `<ImplicitUsings>enable</ImplicitUsings>`
+#         - Set output type:
+#           - `<OutputType>Exe</OutputType>` for Presentation projects
+#           - `<OutputType>Library</OutputType>` for Domain, Application, and Infrastructure projects
+#       - Project Dependencies and References:
+#         - Domain: No references to other projects
+#         - Application:
+#           - References Domain and Infrastructure projects
+#           - Example:
+#             <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#             <ProjectReference Include="..\{Microservice}.Infrastructure\{Microservice}.Infrastructure.csproj" />
+#         - Infrastructure:
+#           - References Domain project only
+#           - Example:
+#             <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#         - Presentation:
+#           - References Application project only
+#           - Example:
+#             <ProjectReference Include="..\{Microservice}.Application\{Microservice}.Application.csproj" />
+#       - Package References:
+#         - Domain: No package references
+#         - Application:
+#           - Include:
+#             <PackageReference Include="AutoMapper" Version="12.0.1" />
+#             <PackageReference Include="MediatR" Version="12.2.0" />
+#         - Infrastructure:
+#           - Include:
+#             <PackageReference Include="MySqlConnector" Version="2.4.0" />
+#         - Presentation:
+#           - Include gRPC and related packages:
+#             <PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+#             <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+#         - Gateway (if applicable):
+#           - Add Ocelot for API gateway:
+#             <PackageReference Include="Ocelot" Version="23.2.2" />
+#       - gRPC Configuration (Presentation Layer Only):
+#         - Include Protobuf definitions for gRPC services:
+#           <Protobuf Include="Protos\{entityLower}grpc.proto" GrpcServices="Server" />
+#       - General Guidelines:
+#         - Ensure `.csproj` files are clean, structured, and free of unnecessary dependencies or properties
+#         - Avoid redundant or unused package references
+#         - Maintain a modular structure with clear separation of concerns across layers
+#         - Project file name should be {Microservice}.{Layer}.csproj, where {Layer} is Domain, Application, Infrastructure, or Presentation
+#       - Example (for illustration only, dynamically generate based on {Microservice} and {Layer}):
+#         <Project Sdk="Microsoft.NET.Sdk">
+#           <PropertyGroup>
+#             <TargetFramework>net{target_version}</TargetFramework>
+#             <Nullable>enable</Nullable>
+#             <ImplicitUsings>enable</ImplicitUsings>
+#             <OutputType>Library</OutputType>
+#           </PropertyGroup>
+#           <ItemGroup>
+#             <PackageReference Include="MySqlConnector" Version="2.4.0" />
+#             <ProjectReference Include="..\{Microservice}.Domain\{Microservice}.Domain.csproj" />
+#           </ItemGroup>
+#         </Project>
+
+
+
 # prompts.yml
 
 base_prompt: |
@@ -142,10 +874,10 @@ file_type_prompts:
       - Inject the connection string via constructor, retrieved from Configuration.GetConnectionString("DefaultConnection")
       - Validate the connection string: throw an exception if null or empty
       - Implement asynchronous CRUD methods: GetByIdAsync, GetAllAsync, AddAsync, UpdateAsync, DeleteAsync
-      - **CRITICAL: Dynamically generate MySQL queries and property mappings based EXACTLY on the properties in {Entity}Dto:**
-        - Analyze {Entity}Dto to extract ALL properties (names and types)
-        - Use these properties in MySQL queries (e.g., SELECT, INSERT, UPDATE) and result mappings
-        - Do NOT use hardcoded properties (e.g., Id, Name, Description); use only {Entity}Dto properties
+      - **CRITICAL: Replicate the properties and types exactly as defined in {Entity}Dto when generating MySQL queries and property mappings.**
+        - Do not analyze or read the {Entity}Dto file directly.
+        - Assume the same property names and types that exist in {Entity}Dto, and reproduce them consistently in this class.
+        - Use these replicated properties in MySQL queries (e.g., SELECT, INSERT, UPDATE) and result mappings.
         - Convert C# PascalCase property names to database column names (e.g., PascalCase to snake_case or match database schema)
         - Map C# types to MySQL types:
           - int → INT
@@ -174,7 +906,7 @@ file_type_prompts:
         - {Microservice}.Domain.Entities for {Entity}
         - MySqlConnector for ADO.NET
         - System, System.Collections.Generic, System.Threading.Tasks for standard types
-      - Example (for illustration only, dynamically generate based on {Entity}Dto properties):
+      - Example (for illustration only, replicate {Entity}Dto properties):
         using MySqlConnector;
         using System.Collections.Generic;
         using System.Threading.Tasks;
@@ -197,7 +929,7 @@ file_type_prompts:
                 {
                     using var conn = new MySqlConnection(_connectionString);
                     await conn.OpenAsync();
-                    using var cmd = new MySqlCommand("SELECT {Property1}, {Property2}, {Property3} FROM {Entity}s WHERE {Property1} = @Id", conn);
+                    using var cmd = new MySqlCommand("SELECT {Property1}, {Property2}, {Property3} FROM {Entity}s WHERE {IdProperty} = @Id", conn);
                     cmd.Parameters.AddWithValue("@Id", id);
                     using var reader = await cmd.ExecuteReaderAsync();
                     if (await reader.ReadAsync())
@@ -213,6 +945,7 @@ file_type_prompts:
                 }
             }
         }
+
 
   repository:
     prompt: |
@@ -470,6 +1203,7 @@ file_type_prompts:
     prompt: |
       Generate a proto3 .proto file to define a gRPC service named {Entity}Service for the {Microservice}.
 
+      The proto content should include:
       - Use syntax = "proto3"
       - Set the C# namespace:
         option csharp_namespace = "{Microservice}.Presentation.Protos";
@@ -480,14 +1214,7 @@ file_type_prompts:
         - Method names must match exactly (e.g., rpc Get{Entity} ({Entity}Request) returns ({Entity}Response);)
         - Use Empty message for methods that take no parameters
 
-      - **CRITICAL: Generate request/response message types based EXACTLY on the properties defined in {Entity}Dto (from {Microservice}.Application.DTOs):**
-        - **ANALYZE the actual {Entity}Dto class and extract ALL its properties with their exact names and types**
-        - **DO NOT use hardcoded or example properties (like 'name', 'email', 'created_at') - these are just examples**
-        - **Extract field names and types directly from the provided {Entity}Dto class definition - do NOT add any fields that don't exist in the DTO**
-        - **Do NOT omit any fields that exist in {Entity}Dto**
-        - **If {Entity}Dto has properties like FirstName, LastName, Username, Password, EnrollmentDate - use EXACTLY these properties**
-        - **Include only primitive types or simple value objects that directly map to {Entity}Dto properties**
-        - **Exclude any navigation properties or complex domain logic from proto messages (same as DTO logic)**
+      - **CRITICAL: Generate request/response message types by exactly mirroring the properties (names and types) defined in the {Entity}Dto class from {Microservice}.Application.DTOs. Do NOT pass or embed the DTO file path or content directly in the prompt or proto file. Instead, replicate the structure, fields, and data types as follows:**
         - Convert C# PascalCase DTO property names to snake_case in proto messages (e.g., FirstName → first_name, LastName → last_name, EnrollmentDate → enrollment_date)
         - **Match C# types to proto types exactly:**
           - int → int32
@@ -501,9 +1228,9 @@ file_type_prompts:
           - Guid → string
           - enum types → corresponding proto enum
           - **Nullable types in DTO → regular field in proto3 (proto3 handles optionality inherently)**
-        - **Ensure one-to-one property mapping: every property in {Entity}Dto must appear in proto messages with correct type**
+        - **Ensure one-to-one property mapping: every property in {Entity}Dto must appear in proto messages with the correct type, and no additional fields should be included**
 
-      - **Generate these standard message types based on ACTUAL {Entity}Dto structure:**
+      - **Generate these standard message types based on the EXACT structure of {Entity}Dto:**
         - **{Entity}Request** (includes only the ID/identifier field from {Entity}Dto if it exists - typically 'Id' property)
         - **{Entity}CreateRequest** (includes ALL {Entity}Dto properties EXCEPT the ID/identifier field)
         - **{Entity}UpdateRequest** (includes ALL {Entity}Dto properties including the ID/identifier field)
@@ -520,8 +1247,9 @@ file_type_prompts:
       - Always include: message Empty {}
       - Message fields should be numbered sequentially from 1
       - File name: {entityLower}grpc.proto
-      - **Ensure proto messages reflect ACTUAL {Entity}Dto structure exactly - no missing fields, no extra fields, correct type mappings**
+      - **Ensure proto messages reflect the EXACT {Entity}Dto structure - no missing fields, no extra fields, correct type mappings**
       - **Follow the same property inclusion/exclusion logic as the DTO generation prompt**
+      - **Do NOT reference or embed the {Entity}Dto file path or content in the proto file or prompt**
       - **EXAMPLE (for illustration only, dynamically generate based on {Entity}Dto properties):**
         syntax = "proto3";
         import "google/protobuf/timestamp.proto";

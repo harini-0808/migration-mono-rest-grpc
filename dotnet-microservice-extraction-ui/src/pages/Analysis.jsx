@@ -322,22 +322,25 @@ const Analysis = () => {
           analysis_id: analysisResult.analysis_id,
           target_structure: analysisResult.target_structure,
         },
-        { responseType: "blob" }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+          },
+        }
       );
 
-      const blob = new Blob([response.data], { type: "application/zip" });
+      // Decode base64 ZIP data
+      const zipData = atob(response.data.zip_data);
+      const byteNumbers = new Array(zipData.length);
+      for (let i = 0; i < zipData.length; i++) {
+        byteNumbers[i] = zipData.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/zip" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
 
-      const disposition = response.headers["content-disposition"];
-      let fileName = "download.zip";
-      if (disposition && disposition.indexOf("filename=") !== -1) {
-        const fileNameMatch = disposition.match(/filename="?([^"]+)"?/);
-        if (fileNameMatch && fileNameMatch.length === 2) {
-          fileName = fileNameMatch[1];
-        }
-      }
-
+      const fileName = response.data.filename || "download.zip";
       link.href = url;
       link.download = fileName;
       document.body.appendChild(link);
@@ -345,7 +348,11 @@ const Analysis = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
+      // Store token usage in localStorage
+      localStorage.setItem('token_usage', JSON.stringify(response.data.token_usage));
+
       alert("Migration successful!");
+      navigate('/token-usage');
     } catch (err) {
       alert(err.response?.data?.detail || err.message || "Migration failed");
     } finally {
@@ -388,7 +395,7 @@ const Analysis = () => {
 
       const response = await axios.post("/analyze", formData, {
         headers: {
-        "Content-Type": sourceType === "zip" ? "multipart/form-data" : "application/x-www-form-urlencoded",
+          "Content-Type": sourceType === "zip" ? "multipart/form-data" : "application/x-www-form-urlencoded",
         },
       });
 
@@ -626,14 +633,13 @@ const Analysis = () => {
                 hasExistingAnalysis
               }
               className={`w-full flex items-center justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium transition duration-150
-                        ${
-                          isLoading ||
-                          (sourceType === "git" && !repoUrl) ||
-                          (sourceType === "zip" && !zipFile) ||
-                          hasExistingAnalysis
-                            ? "bg-blue-300 cursor-not-allowed text-white/80"
-                            : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md"
-                        }`}
+                        ${isLoading ||
+                  (sourceType === "git" && !repoUrl) ||
+                  (sourceType === "zip" && !zipFile) ||
+                  hasExistingAnalysis
+                  ? "bg-blue-300 cursor-not-allowed text-white/80"
+                  : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md"
+                }`}
             >
               {isLoading ? (
                 <div className="flex items-center space-x-3">
@@ -651,10 +657,9 @@ const Analysis = () => {
                 onClick={handleMigrate}
                 disabled={isMigrating}
                 className={`w-full flex items-center justify-center py-3 px-4 rounded-lg shadow-sm text-sm font-medium transition duration-150
-                  ${
-                    isMigrating
-                      ? "bg-[#82c9d2] cursor-not-allowed text-white/80"
-                      : "bg-[#008597] hover:bg-[#007b8a] text-white hover:shadow-md"
+                  ${isMigrating
+                    ? "bg-[#82c9d2] cursor-not-allowed text-white/80"
+                    : "bg-[#008597] hover:bg-[#007b8a] text-white hover:shadow-md"
                   }`}
               >
                 {isMigrating ? (

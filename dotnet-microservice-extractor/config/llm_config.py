@@ -79,6 +79,10 @@
 # )
 
 
+import os
+import certifi
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, SecretStr, PrivateAttr

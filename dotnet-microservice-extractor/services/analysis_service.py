@@ -1,5 +1,28 @@
 # analysis service
 
+import os
+import certifi
+import requests
+from urllib3 import disable_warnings
+disable_warnings()  # Suppress SSL warnings (temporary for debugging)
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()  # Set globally for requests
+os.environ['SSL_CERT_FILE'] = certifi.where()  # For other SSL uses
+
+# Create session (insecure for debugging)
+secure_session = requests.Session()
+secure_session.verify = False  # Temporary for debugging
+
+# Debug SSL setup
+print("Certifi CA bundle path:", certifi.where())
+print("REQUESTS_CA_BUNDLE:", os.environ.get("REQUESTS_CA_BUNDLE"))
+try:
+    response = secure_session.get("https://api.smith.langchain.com/info", headers={"x-api-key": os.environ.get("LANGCHAIN_API_KEY")})
+    print("Manual test to LangSmith /info:", response.status_code, response.text)
+except Exception as e:
+    print("Manual test to LangSmith /info failed:", e)
+
+from dotenv import load_dotenv
+load_dotenv()
 from typing import Dict,List,Literal,Optional
 import os
 from config.llm_config import pydantic_ai_model
@@ -122,8 +145,7 @@ class ProjectAnalyzer:
             'bin', 'obj', '.vscode', '.idea'
         ]
     
-        self.agent = ReActAgent.from_tools(tools=[],llm = llm_config._llm,verbose=True)
-
+        self.agent = ReActAgent.from_tools(tools=[], llm=llm_config._llm, verbose=True)
     async def create_basic_tree(self) -> Dict:
       tree = {}
       

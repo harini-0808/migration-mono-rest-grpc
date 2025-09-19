@@ -7,7 +7,7 @@ from typing import Dict, Literal, Optional
 from models.response_models import ResponseModel
 from services.migration_service import Migrator
 from services.analysis_service import ProjectAnalyzer
-from utils.file_utils import ensure_directory_exists, safe_remove_directory, clear_empty_folders
+from utils.file_utils import ensure_directory_exists, join_paths, safe_remove_directory, clear_empty_folders
 from utils.git_helpers import clone_repository
 from utils import logger
 import os
@@ -433,11 +433,16 @@ async def migrate_repository(
             raise HTTPException(status_code=500, detail="Zip file not found")
  
         # Return the zip file as a download
-        return FileResponse(
-            zip_file_path,
-            media_type="application/zip",
-            filename=f"{repo_name}.zip"
-        )
+        # Read ZIP file and encode as base64
+        with open(zip_file_path, "rb") as f:
+            zip_data = base64.b64encode(f.read()).decode("utf-8")
+
+        # Return JSON with base64 ZIP and token_usage
+        return {
+            "zip_data": zip_data,
+            "filename": f"{repo_name}.zip",
+            "token_usage": migration_result.get("token_usage")
+        }
     except Exception as e:
         logger.error(f"Migration failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -520,3 +525,4 @@ async def recommend_file(
     except Exception as e:
         logger.error(f"Recommendation failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    

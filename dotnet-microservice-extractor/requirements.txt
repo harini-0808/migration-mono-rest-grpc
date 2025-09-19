@@ -69,6 +69,7 @@ llama-index-readers-file==0.4.4
 llama-index-readers-json==0.3.0
 llama-index-readers-llama-parse==0.4.0
 llama-parse==0.5.20
+langsmith==0.1.75
 logfire==3.5.3
 logfire-api==3.5.3
 markdown-it-py==3.0.0

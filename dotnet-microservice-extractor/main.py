@@ -1,3 +1,7 @@
+import os
+import certifi
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+os.environ['SSL_CERT_FILE'] = certifi.where()
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from routes import api_router

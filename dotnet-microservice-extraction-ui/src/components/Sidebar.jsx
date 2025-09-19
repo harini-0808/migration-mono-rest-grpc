@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom"; // Fixed import from react-router
-import { HiMenuAlt3, HiOutlineChartBar, HiOutlineDocumentText, HiOutlineLogin, HiOutlineUserAdd, HiOutlineLogout } from "react-icons/hi";
+import { Link, useNavigate } from "react-router-dom";
+import { HiMenuAlt3, HiOutlineChartBar, HiOutlineDocumentText, HiOutlineLogin, HiOutlineUserAdd, HiOutlineLogout, HiOutlineInformationCircle } from "react-icons/hi";
 import Logo from "../assets/ustlogo.png";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -10,11 +10,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     ? [
         { title: "Analysis", path: "/", icon: <HiOutlineChartBar size={20} /> },
         { title: "Results", path: "/result", icon: <HiOutlineDocumentText size={20} /> },
+        { title: "Token Usage", path: "/token-usage", icon: <HiOutlineInformationCircle size={20} /> },
       ]
     : [
         { title: "Login", path: "/login", icon: <HiOutlineLogin size={20} /> },
         { title: "Register", path: "/register", icon: <HiOutlineUserAdd size={20} /> },
       ];
+
 
   const handleLogout = () => {
     localStorage.removeItem("jwt_token");
